@@ -1,5 +1,9 @@
 local Library = {}
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 
 Library.Theme = {
     Background = Color3.fromRGB(18, 18, 22),
@@ -11,14 +15,15 @@ Library.Theme = {
     Text = Color3.fromRGB(240, 240, 245),
     DarkText = Color3.fromRGB(140, 140, 150),
     ElementBg = Color3.fromRGB(28, 28, 34),
-    Border = Color3.fromRGB(40, 40, 48)
+    Border = Color3.fromRGB(40, 40, 48),
+    DropdownItem = Color3.fromRGB(34, 34, 42),
+    SliderFill = Color3.fromRGB(0, 122, 255)
 }
 
 function Library:CreateWindow(options)
     options = options or {}
     local WindowName = options.Name or "Xenon Hub"
     
-    local CoreGui = game:GetService("CoreGui")
     if CoreGui:FindFirstChild("kqUi_Xenon") then
         CoreGui.kqUi_Xenon:Destroy()
     end
@@ -27,7 +32,6 @@ function Library:CreateWindow(options)
     ScreenGui.Name = "kqUi_Xenon"
     ScreenGui.Parent = CoreGui
     
-    -- Main Frame
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 700, 0, 420)
     MainFrame.Position = UDim2.new(0.5, -350, 0.5, -210)
@@ -35,20 +39,15 @@ function Library:CreateWindow(options)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
     
-    local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 10)
-    MainCorner.Parent = MainFrame
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
     
-    -- Top Bar (macOS style)
     local TopBar = Instance.new("Frame")
     TopBar.Size = UDim2.new(1, 0, 0, 35)
     TopBar.BackgroundColor3 = Library.Theme.Header
     TopBar.BorderSizePixel = 0
     TopBar.Parent = MainFrame
     
-    local TopCorner = Instance.new("UICorner")
-    TopCorner.CornerRadius = UDim.new(0, 10)
-    TopCorner.Parent = TopBar
+    Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
     
     local FixTop = Instance.new("Frame")
     FixTop.Size = UDim2.new(1, 0, 0, 5)
@@ -58,7 +57,6 @@ function Library:CreateWindow(options)
     FixTop.Parent = TopBar
     
     -- Draggable
-    local UserInputService = game:GetService("UserInputService")
     local dragging, dragInput, dragStart, startPos
     
     TopBar.InputBegan:Connect(function(input)
@@ -115,7 +113,6 @@ function Library:CreateWindow(options)
     GreenDot.Parent = TopBar
     Instance.new("UICorner", GreenDot).CornerRadius = UDim.new(1, 0)
     
-    -- Title
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(0, 300, 1, 0)
     TitleLabel.Position = UDim2.new(0, 80, 0, 0)
@@ -127,7 +124,6 @@ function Library:CreateWindow(options)
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = TopBar
     
-    -- Sidebar
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Size = UDim2.new(0, 180, 1, -35)
     Sidebar.Position = UDim2.new(0, 0, 0, 35)
@@ -148,7 +144,6 @@ function Library:CreateWindow(options)
     SidebarPadding.PaddingRight = UDim.new(0, 10)
     SidebarPadding.Parent = Sidebar
     
-    -- Container Holder
     local ContainerHolder = Instance.new("Frame")
     ContainerHolder.Size = UDim2.new(1, -180, 1, -35)
     ContainerHolder.Position = UDim2.new(0, 180, 0, 35)
@@ -166,7 +161,7 @@ function Library:CreateWindow(options)
         TabButton.BackgroundColor3 = Library.Theme.Accent
         TabButton.BackgroundTransparency = 1
         TabButton.Font = Enum.Font.SourceSansSemibold
-        TabButton.Text = "   " .. tabName
+        TabButton.Text = "    " .. tabName
         TabButton.TextColor3 = Library.Theme.DarkText
         TabButton.TextSize = 14
         TabButton.TextXAlignment = Enum.TextXAlignment.Left
@@ -274,6 +269,228 @@ function Library:CreateWindow(options)
                 
                 if toggleOptions.Callback then
                     toggleOptions.Callback(toggled)
+                end
+            end)
+        end
+        
+        function TabObject:CreateDropdown(dropOptions)
+            dropOptions = dropOptions or {}
+            local dropName = dropOptions.Name or "Dropdown"
+            local optionsList = dropOptions.Options or {"Option 1", "Option 2"}
+            local defaultOption = dropOptions.Default or optionsList[1]
+            local callback = dropOptions.Callback
+            
+            local isOpen = false
+            local selected = defaultOption
+            
+            local DropFrame = Instance.new("Frame")
+            DropFrame.Size = UDim2.new(1, 0, 0, 46)
+            DropFrame.BackgroundColor3 = Library.Theme.ElementBg
+            DropFrame.BorderSizePixel = 0
+            DropFrame.ClipsDescendants = true
+            DropFrame.Parent = TabPage
+            
+            Instance.new("UICorner", DropFrame).CornerRadius = UDim.new(0, 8)
+            
+            local Title = Instance.new("TextLabel")
+            Title.Size = UDim2.new(0.6, 0, 0, 46)
+            Title.Position = UDim2.new(0, 12, 0, 0)
+            Title.BackgroundTransparency = 1
+            Title.Font = Enum.Font.SourceSansBold
+            Title.Text = dropName
+            Title.TextColor3 = Library.Theme.Text
+            Title.TextSize = 14
+            Title.TextXAlignment = Enum.TextXAlignment.Left
+            Title.Parent = DropFrame
+            
+            local ValueLabel = Instance.new("TextLabel")
+            ValueLabel.Size = UDim2.new(0.4, -30, 0, 46)
+            ValueLabel.Position = UDim2.new(0.6, 0, 0, 0)
+            ValueLabel.BackgroundTransparency = 1
+            ValueLabel.Font = Enum.Font.SourceSans
+            ValueLabel.Text = tostring(selected)
+            ValueLabel.TextColor3 = Library.Theme.DarkText
+            ValueLabel.TextSize = 13
+            ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+            ValueLabel.Parent = DropFrame
+            
+            local Arrow = Instance.new("TextLabel")
+            Arrow.Size = UDim2.new(0, 20, 0, 46)
+            Arrow.Position = UDim2.new(1, -25, 0, 0)
+            Arrow.BackgroundTransparency = 1
+            Arrow.Font = Enum.Font.SourceSansBold
+            Arrow.Text = "+"
+            Arrow.TextColor3 = Library.Theme.DarkText
+            Arrow.TextSize = 16
+            Arrow.Parent = DropFrame
+            
+            local DropContainer = Instance.new("Frame")
+            DropContainer.Size = UDim2.new(1, 0, 0, 0)
+            DropContainer.Position = UDim2.new(0, 0, 0, 46)
+            DropContainer.BackgroundTransparency = 1
+            DropContainer.Parent = DropFrame
+            
+            local DropLayout = Instance.new("UIListLayout")
+            DropLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            DropLayout.Padding = UDim.new(0, 4)
+            DropLayout.Parent = DropContainer
+            
+            local DropPadding = Instance.new("UIPadding")
+            DropPadding.PaddingTop = UDim.new(0, 5)
+            DropPadding.PaddingBottom = UDim.new(0, 10)
+            DropPadding.PaddingLeft = UDim.new(0, 10)
+            DropPadding.PaddingRight = UDim.new(0, 10)
+            DropPadding.Parent = DropContainer
+            
+            local function UpdateSize()
+                local contentHeight = DropLayout.AbsoluteContentSize.Y + 15
+                if isOpen then
+                    TweenService:Create(DropFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 46 + contentHeight)}):Play()
+                else
+                    TweenService:Create(DropFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 46)}):Play()
+                end
+            end
+            
+            for _, opt in ipairs(optionsList) do
+                local OptButton = Instance.new("TextButton")
+                OptButton.Size = UDim2.new(1, 0, 0, 30)
+                OptButton.BackgroundColor3 = Library.Theme.DropdownItem
+                OptButton.BorderSizePixel = 0
+                OptButton.Font = Enum.Font.SourceSansSemibold
+                OptButton.Text = "  " .. tostring(opt)
+                OptButton.TextColor3 = (opt == selected) and Library.Theme.Text or Library.Theme.DarkText
+                OptButton.TextSize = 13
+                OptButton.TextXAlignment = Enum.TextXAlignment.Left
+                OptButton.Parent = DropContainer
+                
+                Instance.new("UICorner", OptButton).CornerRadius = UDim.new(0, 6)
+                
+                OptButton.MouseButton1Click:Connect(function()
+                    selected = opt
+                    ValueLabel.Text = tostring(selected)
+                    isOpen = false
+                    Arrow.Text = "+"
+                    UpdateSize()
+                    
+                    for _, child in ipairs(DropContainer:GetChildren()) do
+                        if child:IsA("TextButton") then
+                            child.TextColor3 = Library.Theme.DarkText
+                        end
+                    end
+                    OptButton.TextColor3 = Library.Theme.Text
+                    
+                    if callback then
+                        callback(selected)
+                    end
+                end)
+            end
+            
+            local ClickBox = Instance.new("TextButton")
+            ClickBox.Size = UDim2.new(1, 0, 0, 46)
+            ClickBox.BackgroundTransparency = 1
+            ClickBox.Text = ""
+            ClickBox.Parent = DropFrame
+            
+            ClickBox.MouseButton1Click:Connect(function()
+                isOpen = not isOpen
+                Arrow.Text = isOpen and "-" or "+"
+                UpdateSize()
+            end)
+        end
+        
+        function TabObject:CreateSlider(sliderOptions)
+            sliderOptions = sliderOptions or {}
+            local sliderName = sliderOptions.Name or "Slider"
+            local min = sliderOptions.Min or 0
+            local max = sliderOptions.Max or 100
+            local default = sliderOptions.Default or min
+            local callback = sliderOptions.Callback
+            
+            local value = default
+            
+            local SliderFrame = Instance.new("Frame")
+            SliderFrame.Size = UDim2.new(1, 0, 0, 60)
+            SliderFrame.BackgroundColor3 = Library.Theme.ElementBg
+            SliderFrame.BorderSizePixel = 0
+            SliderFrame.Parent = TabPage
+            
+            Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 8)
+            
+            local Title = Instance.new("TextLabel")
+            Title.Size = UDim2.new(1, -60, 0, 30)
+            Title.Position = UDim2.new(0, 12, 0, 5)
+            Title.BackgroundTransparency = 1
+            Title.Font = Enum.Font.SourceSansBold
+            Title.Text = sliderName
+            Title.TextColor3 = Library.Theme.Text
+            Title.TextSize = 14
+            Title.TextXAlignment = Enum.TextXAlignment.Left
+            Title.Parent = SliderFrame
+            
+            local ValueLabel = Instance.new("TextLabel")
+            ValueLabel.Size = UDim2.new(0, 50, 0, 30)
+            ValueLabel.Position = UDim2.new(1, -60, 0, 5)
+            ValueLabel.BackgroundTransparency = 1
+            ValueLabel.Font = Enum.Font.SourceSansBold
+            ValueLabel.Text = tostring(value)
+            ValueLabel.TextColor3 = Library.Theme.DarkText
+            ValueLabel.TextSize = 13
+            ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+            ValueLabel.Parent = SliderFrame
+            
+            local SliderBar = Instance.new("Frame")
+            SliderBar.Size = UDim2.new(1, -24, 0, 6)
+            SliderBar.Position = UDim2.new(0, 12, 0, 42)
+            SliderBar.BackgroundColor3 = Library.Theme.InactiveToggle
+            SliderBar.BorderSizePixel = 0
+            SliderBar.Parent = SliderFrame
+            
+            Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
+            
+            local SliderFill = Instance.new("Frame")
+            SliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+            SliderFill.BackgroundColor3 = Library.Theme.SliderFill
+            SliderFill.BorderSizePixel = 0
+            SliderFill.Parent = SliderBar
+            
+            Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+            
+            local SliderButton = Instance.new("TextButton")
+            SliderButton.Size = UDim2.new(1, 0, 1, 10)
+            SliderButton.Position = UDim2.new(0, 0, 0, -5)
+            SliderButton.BackgroundTransparency = 1
+            SliderButton.Text = ""
+            SliderButton.Parent = SliderBar
+            
+            local draggingSlider = false
+            
+            local function UpdateSlider(input)
+                local sizeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+                value = math.floor(min + ((max - min) * sizeX))
+                SliderFill.Size = UDim2.new(sizeX, 0, 1, 0)
+                ValueLabel.Text = tostring(value)
+                
+                if callback then
+                    callback(value)
+                end
+            end
+            
+            SliderButton.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingSlider = true
+                    UpdateSlider(input)
+                end
+            end)
+            
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    draggingSlider = false
+                end
+            end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    UpdateSlider(input)
                 end
             end)
         end
