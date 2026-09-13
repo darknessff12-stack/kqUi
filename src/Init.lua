@@ -87,7 +87,7 @@ function Library:CreateWindow(options)
         end
     end)
     
-    -- Mac Dots
+    -- Mac Dots (Red: Close)
     local RedDot = Instance.new("TextButton")
     RedDot.Size = UDim2.new(0, 12, 0, 12)
     RedDot.Position = UDim2.new(0, 12, 0.5, -6)
@@ -100,7 +100,7 @@ function Library:CreateWindow(options)
         ScreenGui:Destroy()
     end)
     
-    -- ปุ่มย่อ/ขยาย (ปุ่มสีเหลือง)
+    -- Yellow Dot: Minimize / Restore
     local YellowDot = Instance.new("TextButton")
     YellowDot.Size = UDim2.new(0, 12, 0, 12)
     YellowDot.Position = UDim2.new(0, 32, 0.5, -6)
@@ -307,7 +307,7 @@ function Library:CreateWindow(options)
             Instance.new("UICorner", DropFrame).CornerRadius = UDim.new(0, 8)
             
             local Title = Instance.new("TextLabel")
-            Title.Size = UDim2.new(0.6, 0, 0, 46)
+            Title.Size = UDim2.new(0.5, 0, 0, 46)
             Title.Position = UDim2.new(0, 12, 0, 0)
             Title.BackgroundTransparency = 1
             Title.Font = Enum.Font.SourceSansBold
@@ -318,8 +318,8 @@ function Library:CreateWindow(options)
             Title.Parent = DropFrame
             
             local ValueLabel = Instance.new("TextLabel")
-            ValueLabel.Size = UDim2.new(0.4, -30, 0, 46)
-            ValueLabel.Position = UDim2.new(0.6, 0, 0, 0)
+            ValueLabel.Size = UDim2.new(0.5, -55, 0, 46)
+            ValueLabel.Position = UDim2.new(0.5, 0, 0, 0)
             ValueLabel.BackgroundTransparency = 1
             ValueLabel.Font = Enum.Font.SourceSans
             ValueLabel.Text = tostring(selected)
@@ -412,7 +412,6 @@ function Library:CreateWindow(options)
             
             PopulateOptions(optionsList)
             
-            -- ฟังก์ชันสำหรับ Refresh ข้อมูลใน Dropdown
             function DropdownObject:Refresh(newOptions, newDefault)
                 optionsList = newOptions or optionsList
                 if newDefault then
