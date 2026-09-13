@@ -210,7 +210,7 @@ function Library:CreateWindow(options)
             end
             
             TabPage.Visible = true
-            TabButton.BackgroundColor3 = Library.Theme.AccentColor
+            TabButton.BackgroundColor3 = Library.Theme.Accent -- แก้ไขจาก AccentColor เป็น Accent แล้วครับ
             TabButton.BackgroundTransparency = 0
             TabButton.TextColor3 = Library.Theme.Text
         end
