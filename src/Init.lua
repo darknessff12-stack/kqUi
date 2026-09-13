@@ -5,7 +5,7 @@ Library.Theme = {
     Background = Color3.fromRGB(18, 18, 22),
     Sidebar = Color3.fromRGB(24, 24, 28),
     Header = Color3.fromRGB(22, 22, 26),
-    Accent = Color3.fromRGB(230, 30, 90), -- สีแดง/ชมพูสไตล์ Xenon สำหรับปุ่มเมนูที่เลือก
+    Accent = Color3.fromRGB(230, 30, 90), -- สีแดง/ชมพูสไตล์ Xenon
     ActiveToggle = Color3.fromRGB(0, 122, 255),
     InactiveToggle = Color3.fromRGB(50, 50, 60),
     Text = Color3.fromRGB(240, 240, 245),
@@ -163,11 +163,11 @@ function Library:CreateWindow(options)
         
         local TabButton = Instance.new("TextButton")
         TabButton.Size = UDim2.new(1, 0, 0, 32)
-        TabButton.BackgroundColor3 = FirstTab and Library.Theme.AccentColor or Color3.fromRGB(0,0,0)
-        TabButton.BackgroundTransparency = FirstTab and 0 or 1
+        TabButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
+        TabButton.BackgroundTransparency = 1
         TabButton.Font = Enum.Font.SourceSansSemibold
         TabButton.Text = "   " .. tabName
-        TabButton.TextColor3 = FirstTab and Library.Theme.Text or Library.Theme.DarkText
+        TabButton.TextColor3 = Library.Theme.DarkText
         TabButton.TextSize = 14
         TabButton.TextXAlignment = Enum.TextXAlignment.Left
         TabButton.Parent = Sidebar
@@ -177,7 +177,7 @@ function Library:CreateWindow(options)
         local TabPage = Instance.new("ScrollingFrame")
         TabPage.Size = UDim2.new(1, 0, 1, 0)
         TabPage.BackgroundTransparency = 1
-        TabPage.Visible = FirstTab
+        TabPage.Visible = false
         TabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
         TabPage.ScrollBarThickness = 4
         TabPage.Parent = ContainerHolder
@@ -197,7 +197,7 @@ function Library:CreateWindow(options)
             TabPage.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 30)
         end)
         
-        TabButton.MouseButton1Click:Connect(function()
+        local function SelectTab()
             for _, v in pairs(ContainerHolder:GetChildren()) do
                 if v:IsA("ScrollingFrame") then v.Visible = false end
             end
@@ -219,9 +219,15 @@ function Library:CreateWindow(options)
                 BackgroundTransparency = 0
             }):Play()
             TabButton.TextColor3 = Library.Theme.Text
-        end)
+        end
         
-        FirstTab = false
+        TabButton.MouseButton1Click:Connect(SelectTab)
+        
+        -- ถ้าเป็นแท็บแรก ให้บังคับเลือกเปิดใช้งานทันทีตั้งแต่สร้าง
+        if FirstTab then
+            SelectTab()
+            FirstTab = false
+        end
         
         function TabObject:CreateToggle(toggleOptions)
             toggleOptions = toggleOptions or {}
