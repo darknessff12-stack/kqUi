@@ -1,9 +1,9 @@
 local Library = {}
 Library.Theme = {
-    Background = Color3.fromRGB(18, 18, 20),
+    Background = Color3.fromRGB(18, 18, 22),
     Sidebar = Color3.fromRGB(24, 24, 28),
     Header = Color3.fromRGB(22, 22, 26),
-    Accent = Color3.fromRGB(230, 30, 90), -- สีชมพูแดงสไตล์ Xenon
+    Accent = Color3.fromRGB(230, 30, 90),
     Text = Color3.fromRGB(240, 240, 245),
     DarkText = Color3.fromRGB(140, 140, 150),
     ElementBg = Color3.fromRGB(28, 28, 34),
@@ -35,7 +35,7 @@ function Library:CreateWindow(options)
     MainCorner.CornerRadius = UDim.new(0, 10)
     MainCorner.Parent = MainFrame
     
-    -- Top Bar (Mac style buttons & title)
+    -- Top Bar (macOS style)
     local TopBar = Instance.new("Frame")
     TopBar.Size = UDim2.new(1, 0, 0, 35)
     TopBar.BackgroundColor3 = Library.Theme.Header
@@ -46,7 +46,6 @@ function Library:CreateWindow(options)
     TopCorner.CornerRadius = UDim.new(0, 10)
     TopCorner.Parent = TopBar
     
-    -- แก้ขอบล่างของ TopBar ให้เหลี่ยมเพื่อความเนียน
     local FixTop = Instance.new("Frame")
     FixTop.Size = UDim2.new(1, 0, 0, 5)
     FixTop.Position = UDim2.new(0, 0, 1, -5)
@@ -54,13 +53,50 @@ function Library:CreateWindow(options)
     FixTop.BorderSizePixel = 0
     FixTop.Parent = TopBar
     
-    -- Mac Dots (Red, Yellow, Green)
-    local RedDot = Instance.new("Frame")
+    -- ระบบลากหน้าต่าง (Draggable) ให้ขยับจอได้เหมือนหน้าต่าง Mac ปกติ
+    local UserInputService = game:GetService("UserInputService")
+    local dragging, dragInput, dragStart, startPos
+    
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    TopBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    -- Mac Dots (Red = ปิด, Yellow = ย่อ, Green = ขยายเต็มจอ)
+    local RedDot = Instance.new("TextButton")
     RedDot.Size = UDim2.new(0, 12, 0, 12)
     RedDot.Position = UDim2.new(0, 12, 0.5, -6)
     RedDot.BackgroundColor3 = Color3.fromRGB(255, 95, 85)
+    RedDot.Text = ""
     RedDot.Parent = TopBar
     Instance.new("UICorner", RedDot).CornerRadius = UDim.new(1, 0)
+    
+    -- กดปุ่มแดงเพื่อปิด UI ทิ้ง
+    RedDot.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
     
     local YellowDot = Instance.new("Frame")
     YellowDot.Size = UDim2.new(0, 12, 0, 12)
@@ -76,7 +112,7 @@ function Library:CreateWindow(options)
     GreenDot.Parent = TopBar
     Instance.new("UICorner", GreenDot).CornerRadius = UDim.new(1, 0)
     
-    -- Title & Subtitleใน TopBar
+    -- Title
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(0, 300, 1, 0)
     TitleLabel.Position = UDim2.new(0, 80, 0, 0)
@@ -84,11 +120,11 @@ function Library:CreateWindow(options)
     TitleLabel.Font = Enum.Font.SourceSansBold
     TitleLabel.Text = WindowName
     TitleLabel.TextColor3 = Library.Theme.Text
-    TitleLabel.TextSize = 14
+    TitleLabel.TextSize = 13
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = TopBar
     
-    -- Sidebar (เมนูด้านซ้าย)
+    -- Sidebar
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Size = UDim2.new(0, 180, 1, -35)
     Sidebar.Position = UDim2.new(0, 0, 0, 35)
@@ -109,7 +145,7 @@ function Library:CreateWindow(options)
     SidebarPadding.PaddingRight = UDim.new(0, 10)
     SidebarPadding.Parent = Sidebar
     
-    -- Container สำหรับเนื้อหาด้านขวา
+    -- Container Holder
     local ContainerHolder = Instance.new("Frame")
     ContainerHolder.Size = UDim2.new(1, -180, 1, -35)
     ContainerHolder.Position = UDim2.new(0, 180, 0, 35)
@@ -122,7 +158,6 @@ function Library:CreateWindow(options)
     function WindowObject:CreateTab(tabName)
         local TabObject = {}
         
-        -- ปุ่มเปลี่ยนแท็บใน Sidebar
         local TabButton = Instance.new("TextButton")
         TabButton.Size = UDim2.new(1, 0, 0, 32)
         TabButton.BackgroundColor3 = FirstTab and Library.Theme.AccentColor or Color3.fromRGB(0,0,0)
@@ -134,11 +169,8 @@ function Library:CreateWindow(options)
         TabButton.TextXAlignment = Enum.TextXAlignment.Left
         TabButton.Parent = Sidebar
         
-        local BtnCorner = Instance.new("UICorner")
-        BtnCorner.CornerRadius = UDim.new(0, 6)
-        BtnCorner.Parent = TabButton
+        Instance.new("UICorner", TabButton).CornerRadius = UDim.new(0, 6)
         
-        -- หน้าเนื้อหาของแท็บนั้นๆ
         local TabPage = Instance.new("ScrollingFrame")
         TabPage.Size = UDim2.new(1, 0, 1, 0)
         TabPage.BackgroundTransparency = 1
@@ -204,7 +236,6 @@ function Library:CreateWindow(options)
             Title.TextXAlignment = Enum.TextXAlignment.Left
             Title.Parent = ToggleFrame
             
-            -- สวิตช์เปิดปิดสไตล์โมเดิร์น
             local SwitchBg = Instance.new("Frame")
             SwitchBg.Size = UDim2.new(0, 40, 0, 22)
             SwitchBg.Position = UDim2.new(1, -52, 0.5, -11)
