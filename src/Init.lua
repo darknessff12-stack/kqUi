@@ -203,27 +203,20 @@ function Library:CreateWindow(options)
             end
             for _, v in pairs(Sidebar:GetChildren()) do
                 if v:IsA("TextButton") then
-                    local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                    TweenService:Create(v, tweenInfo, {
-                        BackgroundColor3 = Color3.fromRGB(0,0,0),
-                        BackgroundTransparency = 1
-                    }):Play()
+                    v.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                    v.BackgroundTransparency = 1
                     v.TextColor3 = Library.Theme.DarkText
                 end
             end
             
             TabPage.Visible = true
-            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-            TweenService:Create(TabButton, tweenInfo, {
-                BackgroundColor3 = Library.Theme.AccentColor,
-                BackgroundTransparency = 0
-            }):Play()
+            TabButton.BackgroundColor3 = Library.Theme.AccentColor
+            TabButton.BackgroundTransparency = 0
             TabButton.TextColor3 = Library.Theme.Text
         end
         
         TabButton.MouseButton1Click:Connect(SelectTab)
         
-        -- ถ้าเป็นแท็บแรก ให้บังคับเลือกเปิดใช้งานทันทีตั้งแต่สร้าง
         if FirstTab then
             SelectTab()
             FirstTab = false
