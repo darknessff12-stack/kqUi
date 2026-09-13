@@ -365,38 +365,64 @@ function Library:CreateWindow(options)
                 end
             end
             
-            for _, opt in ipairs(optionsList) do
-                local OptButton = Instance.new("TextButton")
-                OptButton.Size = UDim2.new(1, 0, 0, 30)
-                OptButton.BackgroundColor3 = Library.Theme.DropdownItem
-                OptButton.BorderSizePixel = 0
-                OptButton.Font = Enum.Font.SourceSansSemibold
-                OptButton.Text = "  " .. tostring(opt)
-                OptButton.TextColor3 = (opt == selected) and Library.Theme.Text or Library.Theme.DarkText
-                OptButton.TextSize = 13
-                OptButton.TextXAlignment = Enum.TextXAlignment.Left
-                OptButton.Parent = DropContainer
+            local DropdownObject = {}
+            
+            local function PopulateOptions(opts)
+                for _, child in ipairs(DropContainer:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child:Destroy()
+                    end
+                end
                 
-                Instance.new("UICorner", OptButton).CornerRadius = UDim.new(0, 6)
-                
-                OptButton.MouseButton1Click:Connect(function()
-                    selected = opt
-                    ValueLabel.Text = tostring(selected)
-                    isOpen = false
-                    Arrow.Text = "+"
-                    UpdateSize()
+                for _, opt in ipairs(opts) do
+                    local OptButton = Instance.new("TextButton")
+                    OptButton.Size = UDim2.new(1, 0, 0, 30)
+                    OptButton.BackgroundColor3 = Library.Theme.DropdownItem
+                    OptButton.BorderSizePixel = 0
+                    OptButton.Font = Enum.Font.SourceSansSemibold
+                    OptButton.Text = "  " .. tostring(opt)
+                    OptButton.TextColor3 = (opt == selected) and Library.Theme.Text or Library.Theme.DarkText
+                    OptButton.TextSize = 13
+                    OptButton.TextXAlignment = Enum.TextXAlignment.Left
+                    OptButton.Parent = DropContainer
                     
-                    for _, child in ipairs(DropContainer:GetChildren()) do
-                        if child:IsA("TextButton") then
-                            child.TextColor3 = Library.Theme.DarkText
+                    Instance.new("UICorner", OptButton).CornerRadius = UDim.new(0, 6)
+                    
+                    OptButton.MouseButton1Click:Connect(function()
+                        selected = opt
+                        ValueLabel.Text = tostring(selected)
+                        isOpen = false
+                        Arrow.Text = "+"
+                        UpdateSize()
+                        
+                        for _, child in ipairs(DropContainer:GetChildren()) do
+                            if child:IsA("TextButton") then
+                                child.TextColor3 = Library.Theme.DarkText
+                            end
                         end
-                    end
-                    OptButton.TextColor3 = Library.Theme.Text
-                    
-                    if callback then
-                        callback(selected)
-                    end
-                end)
+                        OptButton.TextColor3 = Library.Theme.Text
+                        
+                        if callback then
+                            callback(selected)
+                        end
+                    end)
+                end
+                UpdateSize()
+            end
+            
+            PopulateOptions(optionsList)
+            
+            -- ฟังก์ชันสำหรับ Refresh ข้อมูลใน Dropdown
+            function DropdownObject:Refresh(newOptions, newDefault)
+                optionsList = newOptions or optionsList
+                if newDefault then
+                    selected = newDefault
+                    ValueLabel.Text = tostring(selected)
+                elseif not table.find(optionsList, selected) then
+                    selected = optionsList[1] or ""
+                    ValueLabel.Text = tostring(selected)
+                end
+                PopulateOptions(optionsList)
             end
             
             local ClickBox = Instance.new("TextButton")
@@ -410,6 +436,8 @@ function Library:CreateWindow(options)
                 Arrow.Text = isOpen and "-" or "+"
                 UpdateSize()
             end)
+            
+            return DropdownObject
         end
         
         function TabObject:CreateSlider(sliderOptions)
