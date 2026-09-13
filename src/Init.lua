@@ -5,7 +5,7 @@ Library.Theme = {
     Background = Color3.fromRGB(18, 18, 22),
     Sidebar = Color3.fromRGB(24, 24, 28),
     Header = Color3.fromRGB(22, 22, 26),
-    Accent = Color3.fromRGB(230, 30, 90), -- สีแดง/ชมพูสไตล์ Xenon
+    Accent = Color3.fromRGB(230, 30, 90),
     ActiveToggle = Color3.fromRGB(0, 122, 255),
     InactiveToggle = Color3.fromRGB(50, 50, 60),
     Text = Color3.fromRGB(240, 240, 245),
@@ -163,7 +163,7 @@ function Library:CreateWindow(options)
         
         local TabButton = Instance.new("TextButton")
         TabButton.Size = UDim2.new(1, 0, 0, 32)
-        TabButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
+        TabButton.BackgroundColor3 = Library.Theme.Accent
         TabButton.BackgroundTransparency = 1
         TabButton.Font = Enum.Font.SourceSansSemibold
         TabButton.Text = "   " .. tabName
@@ -203,15 +203,13 @@ function Library:CreateWindow(options)
             end
             for _, v in pairs(Sidebar:GetChildren()) do
                 if v:IsA("TextButton") then
-                    v.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                    v.BackgroundTransparency = 1
+                    TweenService:Create(v, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
                     v.TextColor3 = Library.Theme.DarkText
                 end
             end
             
             TabPage.Visible = true
-            TabButton.BackgroundColor3 = Library.Theme.Accent -- แก้ไขจาก AccentColor เป็น Accent แล้วครับ
-            TabButton.BackgroundTransparency = 0
+            TweenService:Create(TabButton, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
             TabButton.TextColor3 = Library.Theme.Text
         end
         
