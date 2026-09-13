@@ -1,9 +1,13 @@
 local Library = {}
+local TweenService = game:GetService("TweenService")
+
 Library.Theme = {
     Background = Color3.fromRGB(18, 18, 22),
     Sidebar = Color3.fromRGB(24, 24, 28),
     Header = Color3.fromRGB(22, 22, 26),
     Accent = Color3.fromRGB(230, 30, 90),
+    ActiveToggle = Color3.fromRGB(0, 122, 255), -- สีฟ้าตอนเปิด Active
+    InactiveToggle = Color3.fromRGB(50, 50, 60), -- สีตอนปิด
     Text = Color3.fromRGB(240, 240, 245),
     DarkText = Color3.fromRGB(140, 140, 150),
     ElementBg = Color3.fromRGB(28, 28, 34),
@@ -53,7 +57,7 @@ function Library:CreateWindow(options)
     FixTop.BorderSizePixel = 0
     FixTop.Parent = TopBar
     
-    -- ระบบลากหน้าต่าง (Draggable) ให้ขยับจอได้เหมือนหน้าต่าง Mac ปกติ
+    -- Draggable
     local UserInputService = game:GetService("UserInputService")
     local dragging, dragInput, dragStart, startPos
     
@@ -84,7 +88,7 @@ function Library:CreateWindow(options)
         end
     end)
     
-    -- Mac Dots (Red = ปิด, Yellow = ย่อ, Green = ขยายเต็มจอ)
+    -- Mac Dots
     local RedDot = Instance.new("TextButton")
     RedDot.Size = UDim2.new(0, 12, 0, 12)
     RedDot.Position = UDim2.new(0, 12, 0.5, -6)
@@ -93,7 +97,6 @@ function Library:CreateWindow(options)
     RedDot.Parent = TopBar
     Instance.new("UICorner", RedDot).CornerRadius = UDim.new(1, 0)
     
-    -- กดปุ่มแดงเพื่อปิด UI ทิ้ง
     RedDot.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
     end)
@@ -236,10 +239,11 @@ function Library:CreateWindow(options)
             Title.TextXAlignment = Enum.TextXAlignment.Left
             Title.Parent = ToggleFrame
             
+            -- สวิตช์เปิดปิด
             local SwitchBg = Instance.new("Frame")
             SwitchBg.Size = UDim2.new(0, 40, 0, 22)
             SwitchBg.Position = UDim2.new(1, -52, 0.5, -11)
-            SwitchBg.BackgroundColor3 = toggled and Library.Theme.AccentColor or Color3.fromRGB(50, 50, 60)
+            SwitchBg.BackgroundColor3 = toggled and Library.Theme.ActiveToggle or Library.Theme.InactiveToggle
             SwitchBg.Parent = ToggleFrame
             Instance.new("UICorner", SwitchBg).CornerRadius = UDim.new(1, 0)
             
@@ -258,8 +262,16 @@ function Library:CreateWindow(options)
             
             ClickBox.MouseButton1Click:Connect(function()
                 toggled = not toggled
-                SwitchBg.BackgroundColor3 = toggled and Library.Theme.AccentColor or Color3.fromRGB(50, 50, 60)
-                SwitchCircle.Position = toggled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+                
+                -- กำหนดค่าอนิเมชั่นความลื่น (Tween)
+                local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                
+                local targetBgColor = toggled and Library.Theme.ActiveToggle or Library.Theme.InactiveToggle
+                local targetPos = toggled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+                
+                TweenService:Create(SwitchBg, tweenInfo, {BackgroundColor3 = targetBgColor}):Play()
+                TweenService:Create(SwitchCircle, tweenInfo, {Position = targetPos}):Play()
+                
                 if toggleOptions.Callback then
                     toggleOptions.Callback(toggled)
                 end
