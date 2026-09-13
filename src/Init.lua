@@ -5,9 +5,9 @@ Library.Theme = {
     Background = Color3.fromRGB(18, 18, 22),
     Sidebar = Color3.fromRGB(24, 24, 28),
     Header = Color3.fromRGB(22, 22, 26),
-    Accent = Color3.fromRGB(230, 30, 90),
-    ActiveToggle = Color3.fromRGB(0, 122, 255), -- สีฟ้าตอนเปิด Active
-    InactiveToggle = Color3.fromRGB(50, 50, 60), -- สีตอนปิด
+    Accent = Color3.fromRGB(230, 30, 90), -- สีแดง/ชมพูสไตล์ Xenon สำหรับปุ่มเมนูที่เลือก
+    ActiveToggle = Color3.fromRGB(0, 122, 255),
+    InactiveToggle = Color3.fromRGB(50, 50, 60),
     Text = Color3.fromRGB(240, 240, 245),
     DarkText = Color3.fromRGB(140, 140, 150),
     ElementBg = Color3.fromRGB(28, 28, 34),
@@ -203,14 +203,21 @@ function Library:CreateWindow(options)
             end
             for _, v in pairs(Sidebar:GetChildren()) do
                 if v:IsA("TextButton") then
-                    v.BackgroundColor3 = Color3.fromRGB(0,0,0)
-                    v.BackgroundTransparency = 1
+                    local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                    TweenService:Create(v, tweenInfo, {
+                        BackgroundColor3 = Color3.fromRGB(0,0,0),
+                        BackgroundTransparency = 1
+                    }):Play()
                     v.TextColor3 = Library.Theme.DarkText
                 end
             end
+            
             TabPage.Visible = true
-            TabButton.BackgroundColor3 = Library.Theme.AccentColor
-            TabButton.BackgroundTransparency = 0
+            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            TweenService:Create(TabButton, tweenInfo, {
+                BackgroundColor3 = Library.Theme.AccentColor,
+                BackgroundTransparency = 0
+            }):Play()
             TabButton.TextColor3 = Library.Theme.Text
         end)
         
@@ -239,7 +246,6 @@ function Library:CreateWindow(options)
             Title.TextXAlignment = Enum.TextXAlignment.Left
             Title.Parent = ToggleFrame
             
-            -- สวิตช์เปิดปิด
             local SwitchBg = Instance.new("Frame")
             SwitchBg.Size = UDim2.new(0, 40, 0, 22)
             SwitchBg.Position = UDim2.new(1, -52, 0.5, -11)
@@ -262,10 +268,7 @@ function Library:CreateWindow(options)
             
             ClickBox.MouseButton1Click:Connect(function()
                 toggled = not toggled
-                
-                -- กำหนดค่าอนิเมชั่นความลื่น (Tween)
                 local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                
                 local targetBgColor = toggled and Library.Theme.ActiveToggle or Library.Theme.InactiveToggle
                 local targetPos = toggled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
                 
