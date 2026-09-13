@@ -37,6 +37,7 @@ function Library:CreateWindow(options)
     MainFrame.Position = UDim2.new(0.5, -350, 0.5, -210)
     MainFrame.BackgroundColor3 = Library.Theme.Background
     MainFrame.BorderSizePixel = 0
+    MainFrame.ClipsDescendants = true
     MainFrame.Parent = ScreenGui
     
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
@@ -99,12 +100,25 @@ function Library:CreateWindow(options)
         ScreenGui:Destroy()
     end)
     
-    local YellowDot = Instance.new("Frame")
+    -- ปุ่มย่อ/ขยาย (ปุ่มสีเหลือง)
+    local YellowDot = Instance.new("TextButton")
     YellowDot.Size = UDim2.new(0, 12, 0, 12)
     YellowDot.Position = UDim2.new(0, 32, 0.5, -6)
     YellowDot.BackgroundColor3 = Color3.fromRGB(255, 189, 46)
+    YellowDot.Text = ""
     YellowDot.Parent = TopBar
     Instance.new("UICorner", YellowDot).CornerRadius = UDim.new(1, 0)
+    
+    local isMinimized = false
+    YellowDot.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        if isMinimized then
+            TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, 700, 0, 35)}):Play()
+        else
+            TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, 700, 0, 420)}):Play()
+        end
+    end)
     
     local GreenDot = Instance.new("Frame")
     GreenDot.Size = UDim2.new(0, 12, 0, 12)
